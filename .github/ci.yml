@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '**'
+    paths-ignore:
+      - 'docs/**'
+      - 'examples/**'
+      - '.github/**'
+      - '.circleci/**'
+      - '.vscode/**'
+      - 'tests/**'
+      - 'coverage/**'
+      - '.gitignore'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ~/docs-react
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Restore NPM cache
+        uses: actions/cache@v2
+        with:
+          path: ~/docs-react/node_modules
+          key: deps-cache-${{ hashFiles('package.json') }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install codecov
+        run: npm install codecov
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload coverage to Codecov
+        run: ./node_modules/.bin/codecov
+
+      - name: Save NPM cache
+        uses: actions/cache@v2
+        with:
+          path: ~/docs-react/node_modules
+          key: deps-cache-${{ hashFiles('package.json') }}
+
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ~/docs-react
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Restore NPM cache
+        uses: actions/cache@v2
+        with:
+          path: ~/docs-react/node_modules
+          key: deps-cache-${{ hashFiles('package.json') }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Save NPM cache
+        uses: actions/cache@v2
+        with:
+          path: ~/docs-react/node_modules
+          key: deps-cache-${{ hashFiles('package.json') }}
